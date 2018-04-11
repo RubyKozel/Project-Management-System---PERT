@@ -1,6 +1,6 @@
 
 Author of this program :
-Reuven Kozel, 206281412
+Ruby Kozel
 
     HOMEWORK 1 : Project Management System - Pert
     ---------------------------------------------
