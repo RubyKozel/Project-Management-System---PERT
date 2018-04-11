@@ -2,9 +2,9 @@
 Author of this program :
 Ruby Kozel
 
-    HOMEWORK 1 : Project Management System - Pert
+    Project Management System - PERT
     ---------------------------------------------
-    The following program represents a Pert management system.
+    The following program represents a PERT management system.
     The pert itself is a graph, implemented as a dictionary.
     The graph is constructed from 3 vital parts:
 
