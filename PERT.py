@@ -3,12 +3,13 @@ import unittest
 import itertools
 
 # Logger function for logging purposes
-def log(func):
-    def wrapper(self, *args, **kwargs):
-        logging.getLogger(__name__ + ": ").info(func.__name__ + " was invoked from " + self.__class__.__name__)
-        return func(self, *args, **kwargs)
-
-    return wrapper
+def log_with_msg(msg):
+    def log(func):
+        def wrapper(self, *args, **kwargs):
+            logging.getLogger(__name__ + ": ").info(msg)
+            return func(self, *args, **kwargs)
+        return wrapper
+    return log
 
 
 """******************************************************************************************************************"""
@@ -25,16 +26,16 @@ class Activity:
     ********************************************************************************************************************
     """
 
-    @log
+    @log_with_msg("Initializing Activity")
     def __init__(self, name, duration):
         self._name = name
         self._duration = duration
 
-    @log
+    @log_with_msg("Returning Activity repr")
     def __repr__(self) -> str:
         return f"<{self.name}, {self.duration} weeks>"
 
-    @log
+    @log_with_msg("Returning Activity str")
     def __str__(self) -> str:
         return f"<{self.name}, {self.duration} weeks>"
 
@@ -54,11 +55,10 @@ class Activity:
     def duration(self, duration):
         self._duration = duration
 
-    @log
+    @log_with_msg("Comparing Activities")
     def __eq__(self, other) -> bool:
         return self.name == other.name and self.duration == other.duration
 
-    @log
     def __ne__(self, other) -> bool:
         return not self == other
 
@@ -81,7 +81,7 @@ class Node:
     ********************************************************************************************************************
     """
 
-    @log
+    @log_with_msg("Initializing Node")
     def __init__(self, number: int, *parallel_nodes: "List of Nodes"):
         self._number = number
         self._early_finish = 0
@@ -89,11 +89,11 @@ class Node:
         self._slack = 0
         self._parallel_nodes = parallel_nodes
 
-    @log
-    def __repr__(self) -> str:
+    @log_with_msg("Returning Node repr")
+    def __repr__(self) -> repr:
         return f"(Node {self.number})"
 
-    @log
+    @log_with_msg("Returning Node str")
     def __str__(self) -> str:
         string = f"(Node {self.number})"
         if not (self.late_finish == self.early_finish == 0):
@@ -145,24 +145,23 @@ class Node:
     def parallel_nodes(self, *parallel_nodes: tuple):
         self._parallel_nodes = parallel_nodes
 
-    @log
+    @log_with_msg("Checking if Node has parallel nodes")
     def has_parallel_nodes(self) -> bool:
         return list(self.parallel_nodes) != []
 
-    @log
+    @log_with_msg("Comparing Nodes")
     def __eq__(self, other) -> bool:
         return self.number == other.number
 
-    @log
     def __ne__(self, other) -> bool:
         return not self == other
 
-    @log
+    @log_with_msg("Hashing Node")
     def __hash__(self) -> float:
         return hash(self.number)
 
     # For sorting purposes
-    @log
+    @log_with_msg("Checking what node is bigger")
     def __lt__(self, other) -> bool:
         return self.number < other.number
 
@@ -189,17 +188,17 @@ class Transition:
     ********************************************************************************************************************
     """
 
-    @log
+    @log_with_msg("Initializing Transition")
     def __init__(self, from_node: Node, activity: Activity, to_node: Node):
         self._from_node = from_node
         self._activity = activity
         self._to_node = to_node
 
-    @log
-    def __repr__(self) -> str:
+    @log_with_msg("Returning Transition repr")
+    def __repr__(self) -> repr:
         return f"({repr(self._from_node)}, {self._activity}, {repr(self._to_node)})"
 
-    @log
+    @log_with_msg("Returning Transition str")
     def __str__(self) -> str:
         return f" {self.from_node} -> {self._activity} -> {self._to_node}"
 
@@ -227,11 +226,10 @@ class Transition:
     def activity(self, activity: Activity):
         self._activity = activity
 
-    @log
+    @log_with_msg("Comparing Transitions")
     def __eq__(self, other) -> bool:
         return self.activity == other.activity
 
-    @log
     def __ne__(self, other) -> bool:
         return not self == other
 
@@ -250,7 +248,7 @@ class Project:
     ********************************************************************************************************************
     """
 
-    @log
+    @log_with_msg("Initializing new PERT")
     def __init__(self, graph: dict = None):
         self._graph = graph if graph is not None else {}
         self._all_nodes = []
@@ -264,7 +262,7 @@ class Project:
         self._end = None
         self.update()
 
-    @log
+    @log_with_msg("Printing PERT")
     def __str__(self) -> str:
         string = '!!WARNING: Invalid Graph!!' if not self.is_valid() else ''
         for path in self.all_paths:
@@ -364,7 +362,7 @@ class Project:
         self._end = end
 
     # nullifies the graph's properties
-    @log
+    @log_with_msg("Nullifying PERT")
     def __nullify_graph__(self):
         self.all_nodes = []
         self.all_transition = []
@@ -379,7 +377,7 @@ class Project:
     # calculates the early finished, the late finishes, the slack times and the duration of the project
     # saves all the lists necessary for the graph in variables to save time
     # this method is used in the constructor and again whenever there's a change in the project's graph
-    @log
+    @log_with_msg("Updating PERT")
     def update(self):
         if self.graph is not None:
             self.all_nodes = self.__get_all_nodes__()
@@ -396,13 +394,13 @@ class Project:
             self.slack_list = self.__get_all_slacks__()
 
     # Return the length of the project
-    @log
+    @log_with_msg("Returning length of PERT")
     def __len__(self) -> float:
         return self.end.late_finish if self.graph is not None else 0
 
     # Returns a node from the graph which his number is node_number
     # @:param node_number - the number of the node which we want to retrieve
-    @log
+    @log_with_msg("Retrieving Node")
     def get_node_number(self, node_number: int) -> list or None:
         for node in self.all_nodes:
             if node.number == node_number:
@@ -414,7 +412,7 @@ class Project:
     #  from_node - the node number from which the activity is going
     #  activity - the activity itself
     #  to_node - the node number to which the activity is going
-    @log
+    @log_with_msg("Adding Activity")
     def add_activity(self, from_node: int, activity: Activity, to_node: int):
         f_node = self.get_node_number(from_node)
         t_node = self.get_node_number(to_node)
@@ -428,14 +426,13 @@ class Project:
 
     # adds an arbitrary amount of transitions to the graph
     # @:param *args - list of transitions to be added to the graph
-    @log
     def add_activities(self, *args: "List of Transitions"):
         for transition in args:
             self.add_activity(transition.from_node.number, transition.activity, transition.to_node.number)
 
     # Removes a transition from the graph which his activity is the argument passed, thus removing the activity too
     # @:param activity - the activity whom transition is deleted
-    @log
+    @log_with_msg("Deleting Activity")
     def del_activity(self, activity: Activity):
         for transitions in self.graph.values():
             for transition in transitions:
@@ -444,47 +441,47 @@ class Project:
         self.update()
 
     # Returns an activity list
-    @log
+    @log_with_msg("Getting Activity list")
     def __get_activities_list__(self) -> list:
         return [transition.activity for transition in self.all_transition]
 
     # Return a list of all nodes, including isolated nodes
-    @log
+    @log_with_msg("Getting all nodes")
     def __get_all_nodes__(self) -> list:
         return list(self.graph.keys()) if self.graph is not None else []
 
     # Returns the transition list
-    @log
+    @log_with_msg("Getting Transition list")
     def __get_transition_list__(self) -> list:
         return list(itertools.chain(*self.graph.values())) if self.graph is not None else []
 
     # Returns a list of isolated nodes =
     # nodes which none of the activities are going to, and none of the activities are going from
-    @log
+    @log_with_msg("Getting isolated nodes")
     def __get_isolated_nodes__(self) -> list:
         return [node for node in self.all_nodes if
                 not self.graph[node] and node not in [tr.to_node for tr in self.all_transition]]
 
     # Returns the critical paths in the project
     # By definition - a critical path is a path which every node in it has 0 slack time
-    @log
+    @log_with_msg("Getting critical paths")
     def __get_critical_paths__(self) -> list:
         return [path for path in self.all_paths if not [node.slack for node in path if node.slack is not 0]]
 
     # Returns true if and only if this graph is valid, aka - has no cycles in it
     # NOTE : a cyclic path in the graph is for example :
     #       Node1->Node2->Node3->Node4->Node2
-    @log
+    @log_with_msg("Checking if valid")
     def is_valid(self) -> bool:
         return True not in [len(set(path)) < len(path) for path in self.all_paths]
 
     # Returns a sorted list of slack
-    @log
+    @log_with_msg("Getting all slack times")
     def __get_all_slacks__(self) -> list:
         return sorted([node.slack for node in self.all_nodes if node.slack is not 0], reverse=True)
 
     # Returns the starting node, not including isolated nodes
-    @log
+    @log_with_msg("Getting start nodes")
     def __get_start_node__(self) -> Node:
         for node in self.all_nodes:
             if node not in [tr.to_node for tr in self.all_transition] and node not in self.isolated_list:
@@ -492,7 +489,7 @@ class Project:
 
     # Returns the ending node, not including isolated nodes
     # NOTICE: if the graph is cyclic, there might not be an end node, in this case, the returned value will be None
-    @log
+    @log_with_msg("Getting end node")
     def __get_end_node__(self) -> Node or None:
         for node in self.all_nodes:
             if not self.graph[node] and not node.has_parallel_nodes() and node not in self.isolated_list:
@@ -500,7 +497,7 @@ class Project:
         return None
 
     # Calculates the early finishes possible
-    @log
+    @log_with_msg("Calculating early finishes")
     def __calc_early_finishes__(self):
         for node in list(itertools.chain(*self.all_paths)):
             for transition in self._graph[node]:
@@ -513,12 +510,12 @@ class Project:
                                                                              par_node.early_finish)
 
     # Calculates the latest finishes possible
-    @log
+    @log_with_msg("Calculating late finishes")
     def __calc_late_finishes__(self):
         if self.end is not None:
             self.end.late_finish = self.end.early_finish
-        for node in list(itertools.chain(*self.all_paths)):
-            for transition in self.graph[node]:
+        for node in reversed(list(itertools.chain(*self.all_paths))):
+            for transition in reversed(self.graph[node]):
                 if transition.to_node.has_parallel_nodes():
                     late = min(
                         [self.get_node_number(par.number).late_finish for par in transition.to_node.parallel_nodes])
@@ -534,14 +531,14 @@ class Project:
                                  transition.to_node.late_finish - transition.activity.duration)
 
     # Calculates the slack times for each node
-    @log
+    @log_with_msg("Calculating slack times")
     def __calc_slack_times__(self):
         for node in self.all_nodes:
             node.slack = node.late_finish - node.early_finish
 
     # Finds all the paths in this project
     # The search will not include paths with isolated nodes.
-    @log
+    @log_with_msg("Finding all paths")
     def __find_all_paths__(self, start_node: Node, path: list = None) -> list:
         graph = self.graph
         path = path if path is not None else []
@@ -558,7 +555,7 @@ class Project:
     # Implementation of the contains method.
     # Returns true if and only if the item is in this graph
     # An item can be of class Node, Activity or Transition
-    @log
+    @log_with_msg("Checking if item is in PERT")
     def __contains__(self, item) -> bool:
         if not (isinstance(item, Node) or isinstance(item, Activity) or isinstance(item, Transition)):
             raise PermissionError("this item doesnt belong to the pert!")
