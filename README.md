@@ -1,10 +1,9 @@
-# Project-Management-System---PERT
-A program that simulates a PERT system.
+
 """
 Author of this program :
 Reuven Kozel, 206281412
 
-    Project Management System - Pert
+    HOMEWORK 1 : Project Management System - Pert
     ---------------------------------------------
     The following program represents a Pert management system.
     The pert itself is a graph, implemented as a dictionary.
@@ -47,3 +46,5 @@ Reuven Kozel, 206281412
 | - (Node A)[0,0] -> <TASK> -> (Node B)[6,6] <---> {(Node C) }  = Transition with parallels                            |
 |**********************************************************************************************************************|    
 
+
+*********************************************************************************************************************"""
